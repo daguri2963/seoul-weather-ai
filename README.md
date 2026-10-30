@@ -86,7 +86,7 @@ python -m http.server 5500
 4. Vercel에서 저장소의 **Root Directory를 `frontend`**로 지정합니다. `API_BASE_URL=https://<Render 주소>`를 설정하고 배포합니다. 실제 Vercel 주소를 Render의 `ALLOWED_ORIGINS`에 추가한 뒤 Render를 재배포합니다.
 5. `https://<Render 주소>/health`, `/docs`와 프론트 URL을 열어 확인합니다. Render 무료 서비스가 잠든 뒤 첫 요청은 지연될 수 있으며 화면에 안내가 표시됩니다.
 
-실제 배포 URL은 계정 설정 후 기록하세요: 프론트 `미배포`, 백엔드 API `미배포`, Swagger `미배포`.
+배포 URL: 프론트 `미배포`, 백엔드 API [https://seoul-weather-ai.onrender.com](https://seoul-weather-ai.onrender.com), Swagger [https://seoul-weather-ai.onrender.com/docs](https://seoul-weather-ai.onrender.com/docs). 2026-10-31에 `/health`와 `/docs`의 HTTP 200 응답 및 OpenAPI 경로 7개를 확인했습니다. 루트(`/`)는 화면이 없는 API이므로 404가 정상입니다.
 
 ## 검증과 제출
 
