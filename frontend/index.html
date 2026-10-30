@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>서울 기온 데이터 AI</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top"><div><strong>서울 기온 데이터 AI</strong><span>2024 · 서울 ASOS 108</span></div><button id="token-button" type="button">접근 토큰</button></header>
+  <main>
+    <section class="intro"><p class="eyebrow">MY DATA ASSISTANT</p><h1>서울의 기온을<br>데이터로 묻고 답하다.</h1><p>저장된 일별 최고기온을 요약하고, AI에게 흐름을 물어보세요.</p></section>
+    <section class="summary" aria-label="데이터 요약"><div><small>관측 기간</small><strong id="period">—</strong></div><div><small>데이터</small><strong id="count">—</strong></div><div><small>평균 최고기온</small><strong id="average">—</strong></div><div><small>최근 흐름</small><strong id="trend">—</strong></div></section>
+    <div id="notice" role="status" aria-live="polite"></div>
+    <div class="grid">
+      <section class="card chat"><div class="card-head"><div><p class="eyebrow">01 / CHAT</p><h2>데이터에게 질문</h2></div><button id="new-chat" type="button">새 대화</button></div><div id="messages" class="messages" aria-live="polite"><p class="empty">“2024년 최고기온의 평균은?”<br>질문을 입력해 시작하세요.</p></div><form id="chat-form" class="chat-form"><input id="question" name="question" maxlength="1000" required placeholder="데이터에 관해 질문하세요" aria-label="질문"><button id="send" type="submit">보내기</button></form><p id="loading" class="hint" hidden>답변을 만드는 중입니다. 서버가 잠들어 있었다면 첫 요청이 조금 늦을 수 있어요.</p></section>
+      <aside class="card history"><div class="card-head"><div><p class="eyebrow">02 / HISTORY</p><h2>이전 대화</h2></div></div><div id="conversations" class="history-list"><p class="empty">저장된 대화가 없습니다.</p></div></aside>
+    </div>
+    <section class="card data"><div class="card-head"><div><p class="eyebrow">03 / DATA</p><h2>관측 데이터 관리</h2></div><span>단위 °C · 일별 최고기온</span></div><form id="data-form" class="data-form"><label>날짜<input type="date" name="date" required></label><label>값 (°C)<input type="number" name="value" step="0.1" min="-100" max="100" required></label><label>메모<input name="memo" maxlength="500" placeholder="선택 사항"></label><button type="submit">추가</button></form><div class="table-wrap"><table><thead><tr><th>날짜</th><th>최고기온</th><th>메모</th><th></th></tr></thead><tbody id="data-list"></tbody></table></div></section>
+  </main>
+  <script src="config.js"></script><script src="app.js"></script>
+</body>
+</html>
