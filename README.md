@@ -14,7 +14,7 @@
 ## 로컬 실행
 
 1. Firebase 프로젝트에서 Firestore Database를 만들고 서비스 계정 키를 발급합니다. 키 파일은 프로젝트 밖에 보관하거나 환경 변수에 넣습니다.
-2. OpenAI API 키를 준비합니다. API 호출은 실제 비용이 들 수 있습니다.
+2. Codyssey 콘솔의 가상 키를 준비합니다. 호출 가능 횟수와 과금 여부는 해당 콘솔에서 확인합니다.
 3. 백엔드를 시작합니다. Codyssey 콘솔의 가상 키는 `OPENAI_API_KEY`에만 입력합니다. 이 키를 채팅, Git, 프론트엔드 설정 파일에 넣지 마세요.
 
 ```powershell
@@ -81,8 +81,8 @@ python -m http.server 5500
 ## 배포
 
 1. 이 프로젝트의 GitHub 저장소는 [daguri2963/seoul-weather-ai](https://github.com/daguri2963/seoul-weather-ai)입니다. GitHub에 코드가 올라간 뒤 Render와 Vercel에서 이 저장소를 연결합니다.
-2. Render에서 저장소 루트의 `render.yaml`로 Blueprint를 만들거나 Python Web Service를 만듭니다. `rootDir=backend`, 빌드 `pip install -r requirements.txt`, 실행 `uvicorn app.main:app --host 0.0.0.0 --port $PORT`입니다. 환경 변수에 키, 허용 출처, 접근 토큰을 입력합니다.
-3. Render 서비스에서 `backend/scripts/import_data.py`를 **한 번 실행**해 366건을 Firestore에 적재합니다. 실행 권한이 없다면 로컬에서 같은 Firebase 프로젝트 키로 실행합니다.
+2. Render에서 저장소 루트의 `render.yaml`로 Blueprint를 만들거나 Python Web Service를 만듭니다. **Free** 플랜인지 생성 전에 확인합니다. 설정 파일은 `plan: free`, `rootDir=backend`, 빌드 `pip install -r requirements.txt`, 실행 `uvicorn app.main:app --host 0.0.0.0 --port $PORT`를 명시합니다. 환경 변수에 키, 허용 출처, 접근 토큰을 입력합니다.
+3. `seoul-weather-ai` Firebase 프로젝트의 Firestore에는 2024년 데이터 **366건을 이미 등록했습니다**. 다른 Firebase 프로젝트에 배포할 때만 로컬에서 `backend/scripts/import_data.py`를 실행합니다. Render Free 서비스는 셸 실행을 지원하지 않습니다.
 4. Vercel에서 저장소의 **Root Directory를 `frontend`**로 지정합니다. `API_BASE_URL=https://<Render 주소>`를 설정하고 배포합니다. 실제 Vercel 주소를 Render의 `ALLOWED_ORIGINS`에 추가한 뒤 Render를 재배포합니다.
 5. `https://<Render 주소>/health`, `/docs`와 프론트 URL을 열어 확인합니다. Render 무료 서비스가 잠든 뒤 첫 요청은 지연될 수 있으며 화면에 안내가 표시됩니다.
 
@@ -96,10 +96,11 @@ python -m pip install -r requirements-dev.txt
 python -m pytest -q
 ```
 
-테스트는 요청 검증, 요약 계산, 채팅 프롬프트 주입·자동 저장, 접근 토큰을 확인합니다. Firebase와 OpenAI의 실제 연결은 배포 후 별도 확인해야 합니다.
+테스트 4개가 통과했습니다. 요청 검증, 요약 계산, 채팅 프롬프트 주입·자동 저장, 접근 토큰을 확인합니다. 실제 Firestore에서 366건을 다시 읽어 기간 `2024-01-01 ~ 2024-12-31`, 평균 `19.54°C`, 최고 `36.4°C`, 최저 `-8.2°C`를 확인했습니다. Codyssey 실제 키를 이용한 AI 호출은 아직 확인 전입니다.
 
-제출 스크린샷은 실제 서비스 설정 후 촬영해 README에 추가하세요: (1) 요약과 질문·AI 답변이 함께 보이는 화면, (2) 데이터 추가 또는 수정 결과가 보이는 화면, (3) 이전 대화를 불러온 화면. 현재는 외부 계정과 키가 설정되지 않아 실제 화면 캡처가 없습니다.
+제출 스크린샷은 실제 서비스 설정 후 촬영해 README에 추가하세요: (1) 요약과 질문·AI 답변이 함께 보이는 화면, (2) 데이터 추가 또는 수정 결과가 보이는 화면, (3) 이전 대화를 불러온 화면. 현재 Codyssey 키와 배포가 완료되지 않아 실제 화면 캡처가 없습니다.
 
 ## 출처
 
 기상청 기상자료개방포털, 서울 ASOS 지점 108, 2024년 일자료. 원본 저장소의 [출처 및 이용 조건 안내](https://github.com/daguri2963/seoul-rain-temperature-analysis#출처와-이용-조건)를 유지합니다. 원본 자료는 사후 보정될 수 있습니다.
+
