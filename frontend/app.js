@@ -38,26 +38,33 @@ async function refreshData() {
   const body = $('data-list'); clear(body);
   for (const row of rows) {
     const tr = document.createElement('tr');
-    for (const value of [row.date, `${row.value}°C`, row.memo || '—']) {
-      const td = document.createElement('td'); td.textContent = value; tr.append(td);
-    }
-    const td = document.createElement('td');
+    const dateCell = document.createElement('td'); dateCell.textContent = row.date;
+    const valueCell = document.createElement('td'); valueCell.textContent = `${row.value}°C`;
+    const memoCell = document.createElement('td'); memoCell.textContent = row.memo || '—';
+    const actions = document.createElement('td'); actions.className = 'row-actions';
     const edit = document.createElement('button'); edit.type = 'button'; edit.textContent = '수정';
-    edit.addEventListener('click', async () => {
-      const input = prompt(`${row.date} 최고기온 (°C)`, row.value);
-      if (input == null) return;
-      const value = Number(input);
-      if (!Number.isFinite(value) || value < -100 || value > 100 || input.trim() === '') return notice('−100~100 사이 숫자를 입력하세요.');
-      try { await api(`/api/data/${encodeURIComponent(row.id)}`, { method: 'PUT', body: JSON.stringify({ date: row.date, value, memo: row.memo || '' }) }); await Promise.all([refreshData(), refreshSummary()]); notice('수정했습니다.'); }
-      catch (error) { notice(error.message); }
-    });
     const remove = document.createElement('button'); remove.type = 'button'; remove.textContent = '삭제';
+    edit.addEventListener('click', () => {
+      const valueInput = document.createElement('input'); valueInput.type = 'number'; valueInput.step = '0.1'; valueInput.min = '-100'; valueInput.max = '100'; valueInput.value = row.value; valueInput.className = 'cell-edit'; valueInput.setAttribute('aria-label', `${row.date} 최고기온`);
+      const memoInput = document.createElement('input'); memoInput.value = row.memo || ''; memoInput.maxLength = 500; memoInput.className = 'cell-edit'; memoInput.setAttribute('aria-label', `${row.date} 메모`);
+      const save = document.createElement('button'); save.type = 'button'; save.textContent = '저장';
+      const cancel = document.createElement('button'); cancel.type = 'button'; cancel.textContent = '취소';
+      valueCell.replaceChildren(valueInput); memoCell.replaceChildren(memoInput); actions.replaceChildren(save, cancel); valueInput.focus();
+      cancel.addEventListener('click', () => { valueCell.textContent = `${row.value}°C`; memoCell.textContent = row.memo || '—'; actions.replaceChildren(edit, remove); });
+      save.addEventListener('click', async () => {
+        const value = Number(valueInput.value);
+        if (!Number.isFinite(value) || value < -100 || value > 100 || valueInput.value.trim() === '') return notice('−100~100 사이 숫자를 입력하세요.');
+        try { await api(`/api/data/${encodeURIComponent(row.id)}`, { method: 'PUT', body: JSON.stringify({ date: row.date, value, memo: memoInput.value.trim() }) }); await Promise.all([refreshData(), refreshSummary()]); notice('수정했습니다.'); }
+        catch (error) { notice(error.message); }
+      });
+    });
+    let pendingDelete = false;
     remove.addEventListener('click', async () => {
-      if (!confirm(`${row.date} 데이터를 삭제할까요?`)) return;
+      if (!pendingDelete) { pendingDelete = true; remove.textContent = '삭제 확인'; notice(`${row.date} 데이터를 삭제하려면 다시 누르세요.`); return; }
       try { await api(`/api/data/${encodeURIComponent(row.id)}`, { method: 'DELETE' }); await Promise.all([refreshData(), refreshSummary()]); notice('삭제했습니다.'); }
       catch (error) { notice(error.message); }
     });
-    td.append(edit, ' ', remove); tr.append(td); body.append(tr);
+    actions.append(edit, remove); tr.append(dateCell, valueCell, memoCell, actions); body.append(tr);
   }
 }
 async function refreshConversations() {
@@ -93,9 +100,19 @@ $('data-form').addEventListener('submit', async (event) => {
 });
 $('new-chat').addEventListener('click', () => { activeConversation = null; clear($('messages')); notice('새 대화를 시작합니다.'); });
 $('token-button').addEventListener('click', () => {
-  const value = prompt('접근 토큰을 입력하세요. 이 브라우저 탭을 닫으면 지워집니다.', accessToken);
-  if (value === null) return;
-  accessToken = value; sessionStorage.setItem('accessToken', value); init();
+  const panel = $('token-form'); panel.hidden = !panel.hidden;
+  $('token-button').setAttribute('aria-expanded', String(!panel.hidden));
+  if (!panel.hidden) $('access-token').focus();
+});
+$('token-cancel').addEventListener('click', () => { $('token-form').hidden = true; $('token-button').setAttribute('aria-expanded', 'false'); });
+$('token-form').addEventListener('submit', (event) => {
+  event.preventDefault();
+  accessToken = $('access-token').value.trim();
+  sessionStorage.setItem('accessToken', accessToken);
+  $('access-token').value = '';
+  $('token-form').hidden = true;
+  $('token-button').setAttribute('aria-expanded', 'false');
+  init();
 });
 async function init() { try { await Promise.all([refreshSummary(), refreshData(), refreshConversations()]); notice(''); } catch (error) { notice(`연결 오류: ${error.message}`); } }
 init();

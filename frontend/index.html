@@ -7,7 +7,13 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="top"><div><strong>서울 기온 데이터 AI</strong><span>2024 · 서울 ASOS 108</span></div><button id="token-button" type="button">접근 토큰</button></header>
+  <header class="top"><div><strong>서울 기온 데이터 AI</strong><span>2024 · 서울 ASOS 108</span></div><button id="token-button" type="button" aria-controls="token-form" aria-expanded="false">접근 토큰</button></header>
+  <form id="token-form" class="token-panel" hidden>
+    <label for="access-token">Render 접근 토큰</label>
+    <input id="access-token" type="password" autocomplete="off" spellcheck="false" required placeholder="보관한 토큰을 입력하세요">
+    <button type="submit">연결</button><button id="token-cancel" type="button">닫기</button>
+    <small>토큰은 이 브라우저 탭에서만 보관합니다.</small>
+  </form>
   <main>
     <section class="intro"><p class="eyebrow">MY DATA ASSISTANT</p><h1>서울의 기온을<br>데이터로 묻고 답하다.</h1><p>저장된 일별 최고기온을 요약하고, AI에게 흐름을 물어보세요.</p></section>
     <section class="summary" aria-label="데이터 요약"><div><small>관측 기간</small><strong id="period">—</strong></div><div><small>데이터</small><strong id="count">—</strong></div><div><small>평균 최고기온</small><strong id="average">—</strong></div><div><small>최근 흐름</small><strong id="trend">—</strong></div></section>
