@@ -2,6 +2,8 @@
 
 기상청 서울 ASOS(108)의 **2024년 공식 일별 최고기온 366건**을 Firestore에 저장하고, 저장된 데이터에서 계산한 요약을 AI 대화에 반영하는 학습용 웹 서비스입니다. 기존 [시계열 분석 저장소](https://github.com/daguri2963/seoul-rain-temperature-analysis)의 `data/processed/temperature_daily_2024.csv`를 재사용했습니다. 원본 분석의 강수 유형별 결론은 이 서비스의 요약과 혼합하지 않았습니다. 이 앱이 다루는 `value`는 **일별 최고기온(°C)** 한 가지입니다.
 
+발표용 설명과 예상 질문·답변은 [프로젝트 보고서](docs/PROJECT_REPORT.md)에 정리했습니다.
+
 ## 기술과 구성
 
 - 백엔드: Python 3.10+, FastAPI, Pydantic, Firebase Admin SDK, OpenAI SDK
