@@ -90,7 +90,7 @@ $('chat-form').addEventListener('submit', async (event) => {
     const result = await api('/api/chat', { method: 'POST', body: JSON.stringify({ message, conversation_id: activeConversation }) });
     activeConversation = result.conversation_id; appendMessage('assistant', result.answer); input.value = '';
     await refreshConversations();
-  } catch (error) { appendMessage('assistant', `오류: ${error.message}`); notice('답변을 저장하지 못했습니다. 다시 시도할 수 있습니다.'); }
+  } catch (error) { appendMessage('assistant', `오류: ${error.message}`); notice('답변을 받지 못했습니다. 다시 시도할 수 있습니다.'); }
   finally { $('send').disabled = false; $('loading').hidden = true; }
 });
 $('data-form').addEventListener('submit', async (event) => {

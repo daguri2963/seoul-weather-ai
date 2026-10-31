@@ -1,3 +1,4 @@
+import logging
 import os
 
 from fastapi import APIRouter, HTTPException
@@ -8,6 +9,7 @@ from app.services import store
 from app.services.summary import summarize
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
+logger = logging.getLogger(__name__)
 
 
 def build_system_prompt(summary: dict) -> str:
@@ -41,13 +43,18 @@ def chat(item: ChatInput):
         if os.getenv("OPENAI_BASE_URL"):
             client_options["base_url"] = os.environ["OPENAI_BASE_URL"]
         result = OpenAI(**client_options).chat.completions.create(
-            model=os.getenv("OPENAI_MODEL", "gpt-5-mini"), messages=messages, max_completion_tokens=350
+            model=os.getenv("OPENAI_MODEL", "gpt-5-mini"),
+            messages=messages,
+            reasoning_effort="minimal",
+            max_completion_tokens=1024,
         )
-        answer = result.choices[0].message.content
+        choice = result.choices[0]
+        answer = (choice.message.content or "").strip()
     except OpenAIError:
         raise HTTPException(502, "AI 응답을 받지 못했습니다. 잠시 후 다시 시도하세요")
     if not answer:
-        raise HTTPException(502, "AI가 빈 응답을 반환했습니다")
+        logger.warning("AI returned no text; finish_reason=%s", choice.finish_reason)
+        raise HTTPException(502, "AI 응답이 비었습니다. 잠시 후 다시 시도하세요")
     if item.conversation_id:
         saved = store.append_exchange(item.conversation_id, item.message, answer)
     else:
