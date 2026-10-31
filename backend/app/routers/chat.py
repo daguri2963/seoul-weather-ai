@@ -39,19 +39,20 @@ def chat(item: ChatInput):
     messages.extend({"role": msg["role"], "content": msg["content"][:4000]} for msg in prior if msg.get("role") in ("user", "assistant"))
     messages.append({"role": "user", "content": item.message})
     try:
-        client_options = {"api_key": os.environ["OPENAI_API_KEY"], "timeout": 25.0}
+        client_options = {"api_key": os.environ["OPENAI_API_KEY"], "timeout": 60.0}
         if os.getenv("OPENAI_BASE_URL"):
             client_options["base_url"] = os.environ["OPENAI_BASE_URL"]
         result = OpenAI(**client_options).chat.completions.create(
             model=os.getenv("OPENAI_MODEL", "gpt-5-mini"),
             messages=messages,
-            reasoning_effort="minimal",
             max_completion_tokens=1024,
         )
         choice = result.choices[0]
         answer = (choice.message.content or "").strip()
-    except OpenAIError:
-        raise HTTPException(502, "AI 응답을 받지 못했습니다. 잠시 후 다시 시도하세요")
+    except OpenAIError as exc:
+        status = getattr(exc, "status_code", None)
+        logger.warning("AI request failed; type=%s status=%s", type(exc).__name__, status)
+        raise HTTPException(502, f"AI 서비스 호출 실패 ({status or type(exc).__name__}). 잠시 후 다시 시도하세요")
     if not answer:
         logger.warning("AI returned no text; finish_reason=%s", choice.finish_reason)
         raise HTTPException(502, "AI 응답이 비었습니다. 잠시 후 다시 시도하세요")

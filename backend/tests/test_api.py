@@ -41,7 +41,7 @@ def test_chat_injects_summary_and_saves(monkeypatch):
         def create(self, **kwargs):
             assert "건수: 1" in kwargs["messages"][0]["content"]
             assert kwargs["max_completion_tokens"] == 1024
-            assert kwargs["reasoning_effort"] == "minimal"
+            assert "reasoning_effort" not in kwargs
             return type("Result", (), {"choices": [type("Choice", (), {"finish_reason": "stop", "message": type("Message", (), {"content": "평균은 7.3°C입니다."})()})()]})()
 
     class FakeOpenAI:
