@@ -83,10 +83,10 @@ python -m http.server 5500
 1. 이 프로젝트의 GitHub 저장소는 [daguri2963/seoul-weather-ai](https://github.com/daguri2963/seoul-weather-ai)입니다. GitHub에 코드가 올라간 뒤 Render와 Vercel에서 이 저장소를 연결합니다.
 2. Render에서 저장소 루트의 `render.yaml`로 Blueprint를 만들거나 Python Web Service를 만듭니다. **Free** 플랜인지 생성 전에 확인합니다. 설정 파일은 `plan: free`, `rootDir=backend`, 빌드 `pip install -r requirements.txt`, 실행 `uvicorn app.main:app --host 0.0.0.0 --port $PORT`를 명시합니다. 환경 변수에 키, 허용 출처, 접근 토큰을 입력합니다.
 3. `seoul-weather-ai` Firebase 프로젝트의 Firestore에는 2024년 데이터 **366건을 이미 등록했습니다**. 다른 Firebase 프로젝트에 배포할 때만 로컬에서 `backend/scripts/import_data.py`를 실행합니다. Render Free 서비스는 셸 실행을 지원하지 않습니다.
-4. Vercel에서 저장소의 **Root Directory를 `frontend`**로 지정합니다. `API_BASE_URL=https://<Render 주소>`를 설정하고 배포합니다. 실제 Vercel 주소를 Render의 `ALLOWED_ORIGINS`에 추가한 뒤 Render를 재배포합니다.
+4. Vercel에서 저장소의 **Root Directory를 `frontend`**로 지정합니다. `API_BASE_URL=https://<Render 주소>`를 설정하고 배포합니다. 이 프로젝트의 Vercel 기본 주소는 API의 기본 CORS 허용 목록에 포함돼 있습니다. 다른 프론트 주소를 사용하면 Render의 `ALLOWED_ORIGINS`에 해당 주소를 추가한 뒤 재배포합니다.
 5. `https://<Render 주소>/health`, `/docs`와 프론트 URL을 열어 확인합니다. Render 무료 서비스가 잠든 뒤 첫 요청은 지연될 수 있으며 화면에 안내가 표시됩니다.
 
-배포 URL: 프론트 `미배포`, 백엔드 API [https://seoul-weather-ai.onrender.com](https://seoul-weather-ai.onrender.com), Swagger [https://seoul-weather-ai.onrender.com/docs](https://seoul-weather-ai.onrender.com/docs). 2026-10-31에 `/health`와 `/docs`의 HTTP 200 응답 및 OpenAPI 경로 7개를 확인했습니다. 루트(`/`)는 화면이 없는 API이므로 404가 정상입니다.
+배포 URL: 프론트 [https://seoul-weather-ai-frontend.vercel.app](https://seoul-weather-ai-frontend.vercel.app), 백엔드 API [https://seoul-weather-ai.onrender.com](https://seoul-weather-ai.onrender.com), Swagger [https://seoul-weather-ai.onrender.com/docs](https://seoul-weather-ai.onrender.com/docs). 2026-10-31에 `/health`와 `/docs`의 HTTP 200 응답 및 OpenAPI 경로 7개를 확인했습니다. 루트(`/`)는 화면이 없는 API이므로 404가 정상입니다.
 
 ## 검증과 제출
 
