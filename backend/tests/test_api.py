@@ -18,15 +18,16 @@ def test_summary_uses_current_sorted_values():
 
 
 def test_validation_and_routes(monkeypatch):
-    monkeypatch.delenv("API_ACCESS_TOKEN", raising=False)
+    monkeypatch.setenv("API_ACCESS_TOKEN", "test-admin-token")
     monkeypatch.setattr(store, "data_rows", lambda: [{"id": "2024-01-01", "date": "2024-01-01", "value": 7.3, "memo": "source"}])
     monkeypatch.setattr(store, "add_data", lambda item: {"id": item["date"], **item})
     client = TestClient(app)
+    admin = {"X-Access-Token": "test-admin-token"}
     assert client.get("/health").status_code == 200
     assert client.get("/docs").status_code == 200
     assert client.get("/api/data/summary").json()["count"] == 1
-    assert client.post("/api/data", json={"date": "2024-01-02", "value": 4.3, "memo": "ok"}).status_code == 201
-    assert client.post("/api/data", json={"date": "bad", "value": "nan"}).status_code == 422
+    assert client.post("/api/data", json={"date": "2024-01-02", "value": 4.3, "memo": "ok"}, headers=admin).status_code == 201
+    assert client.post("/api/data", json={"date": "bad", "value": "nan"}, headers=admin).status_code == 422
 
 
 def test_chat_injects_summary_and_saves(monkeypatch):
@@ -58,6 +59,22 @@ def test_chat_injects_summary_and_saves(monkeypatch):
 
 def test_access_token(monkeypatch):
     monkeypatch.setenv("API_ACCESS_TOKEN", "secret-test-value")
+    monkeypatch.setattr(store, "data_rows", lambda: [])
+    monkeypatch.setattr(store, "conversations", lambda: [{"id": "conversation-1", "title": "테스트"}])
+    monkeypatch.setattr(store, "conversation", lambda doc_id: {"id": doc_id, "messages": []})
     client = TestClient(app)
-    assert client.get("/api/data").status_code == 401
+    assert client.get("/api/data").status_code == 200
+    assert client.get("/api/data/summary").status_code == 200
+    assert client.get("/api/conversations").status_code == 200
+    assert client.get("/api/conversations/conversation-1").status_code == 200
+    assert client.post("/api/chat", json={"message": "안녕"}).status_code == 400
+    assert client.post("/api/data", json={"date": "2024-01-02", "value": 4.3}).status_code == 401
+    assert client.put("/api/data/2024-01-02", json={"date": "2024-01-02", "value": 4.3}).status_code == 401
+    assert client.delete("/api/data/2024-01-02").status_code == 401
+    assert client.delete("/api/conversations/conversation-1").status_code == 401
     assert client.get("/health").status_code == 200
+
+
+def test_data_writes_fail_closed_without_admin_token(monkeypatch):
+    monkeypatch.delenv("API_ACCESS_TOKEN", raising=False)
+    assert TestClient(app).post("/api/data", json={"date": "2024-01-02", "value": 4.3}).status_code == 503

@@ -4,10 +4,21 @@ let activeConversation = null;
 let accessToken = sessionStorage.getItem('accessToken') || '';
 
 function notice(message = '') { $('notice').textContent = message; }
+function showAdminTokenPanel() {
+  $('token-form').hidden = false;
+  $('token-button').setAttribute('aria-expanded', 'true');
+  $('access-token').focus();
+}
 async function api(path, options = {}) {
+  const method = (options.method || 'GET').toUpperCase();
+  const adminWrite = path.startsWith('/api/data') && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method);
+  if (adminWrite && !accessToken) {
+    showAdminTokenPanel();
+    throw new Error('데이터를 변경하려면 관리자 토큰을 입력하세요.');
+  }
   const response = await fetch(`${base}${path}`, {
     ...options,
-    headers: { 'Content-Type': 'application/json', ...(accessToken ? { 'X-Access-Token': accessToken } : {}), ...options.headers },
+    headers: { 'Content-Type': 'application/json', ...(adminWrite && accessToken ? { 'X-Access-Token': accessToken } : {}), ...options.headers },
   });
   if (!response.ok) {
     let detail = `요청 실패 (${response.status})`;
@@ -112,7 +123,7 @@ $('token-form').addEventListener('submit', (event) => {
   $('access-token').value = '';
   $('token-form').hidden = true;
   $('token-button').setAttribute('aria-expanded', 'false');
-  init();
+  notice('관리자 토큰을 저장했습니다. 데이터 변경을 다시 시도하세요.');
 });
 async function init() { try { await Promise.all([refreshSummary(), refreshData(), refreshConversations()]); notice(''); } catch (error) { notice(`연결 오류: ${error.message}`); } }
 init();

@@ -14,10 +14,15 @@ app = FastAPI(title="서울 기온 데이터 AI", version="1.0.0")
 @app.middleware("http")
 async def access_guard(request: Request, call_next):
     token = os.getenv("API_ACCESS_TOKEN")
-    if token and request.url.path.startswith("/api/") and request.method != "OPTIONS":
+    path = request.url.path
+    data_write = (path == "/api/data" or path.startswith("/api/data/")) and request.method in {"POST", "PUT", "PATCH", "DELETE"}
+    conversation_delete = path.startswith("/api/conversations/") and request.method == "DELETE"
+    if data_write or conversation_delete:
+        if not token:
+            return JSONResponse({"detail": "관리자 토큰이 설정되지 않았습니다"}, status_code=503)
         supplied = request.headers.get("X-Access-Token", "")
         if not hmac.compare_digest(supplied, token):
-            return JSONResponse({"detail": "접근 토큰을 확인하세요"}, status_code=401)
+            return JSONResponse({"detail": "관리자 토큰을 확인하세요"}, status_code=401)
     return await call_next(request)
 
 
